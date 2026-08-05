@@ -1,0 +1,7 @@
+venv/
+.ipynb_checkpoints/
+__pycache__/
+*.pyc
+
+GSE146026_Izar_HGSOC_ascites_10x_log.tsv
+GSM6940122.h5ad
