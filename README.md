@@ -1,26 +1,43 @@
+
 # Forecasting Future Transcriptional States Using Time-Course scRNA-seq
 
 ## Project Overview
 
-This project investigates whether computational models can predict future transcriptional states from earlier time-course single-cell RNA sequencing (scRNA-seq) measurements.
+This research investigates whether machine learning models can forecast future transcriptional states using earlier time-course single-cell RNA sequencing (scRNA-seq) measurements.
 
-Six machine learning architectures were benchmarked using two biological systems: hydrogen-peroxide-treated human fibroblasts undergoing senescence and TGF-β-treated human MCF10A breast epithelial cells undergoing epithelial-to-mesenchymal transition (EMT).
+Six computational architectures were benchmarked across two biological systems:
 
-The study focuses on **forecasting completely held-out future cell populations**, comparing predictive performance across model architectures and evaluating whether accurate population-level predictions also preserve cell-to-cell variability.
+- **Fibroblast senescence:** Hydrogen-peroxide-treated human fibroblasts undergoing oxidative-stress-associated senescence.
+- **Epithelial-to-mesenchymal transition (EMT):** TGF-β-treated human MCF10A breast epithelial cells undergoing EMT.
 
-This research was conducted as part of an independent computational biology research project through Polygence.
+The central challenge is predicting a completely held-out future cell population using only earlier observations. Beyond evaluating population-level expression accuracy, the study examines whether models preserve the distributional properties and cell-to-cell variability of observed populations.
+
+The research was conducted through the Polygence Research Program with guidance from a research mentor.
 
 ## Research Objectives
 
-The project addresses three main questions:
+The study addresses three primary questions:
 
 1. Can computational models forecast future transcriptional states from earlier scRNA-seq population measurements?
-2. How do different machine learning architectures compare in their ability to predict unseen future populations?
-3. How do cell-pairing strategies and model architecture influence forecasting accuracy and preservation of cellular variability?
+2. How do different machine learning architectures compare when predicting completely unseen future populations?
+3. How do optimal-transport versus random cell-pairing strategies influence forecasting accuracy and preservation of cellular variability?
+
+## Repository Structure
+
+The repository contains the two primary experimental pipelines:
+
+| File | Description |
+|---|---|
+| `FibroblastDatasetModellingPipeline.ipynb` | Fibroblast senescence forecasting, model training, validation, and evaluation |
+| `EMTDatasetModellingPipeline.ipynb` | EMT forecasting, model training, validation, and evaluation |
+| `README.md` | Research overview, methodology, and results |
+| `.gitignore` | Excludes unnecessary local files and generated artifacts |
+
+Each notebook contains the corresponding dataset's computational workflow and experimental analyses.
 
 ## Models Evaluated
 
-Six computational architectures were implemented and compared:
+Six machine learning architectures were implemented and compared:
 
 | Model | Approach |
 |---|---|
@@ -28,129 +45,168 @@ Six computational architectures were implemented and compared:
 | Multi-Layer Perceptron (MLP) | Feedforward neural network |
 | XGBoost Regressor | Gradient-boosted decision trees |
 | Random Forest Regressor | Ensemble of decision trees |
-| Neural Ordinary Differential Equation (Neural ODE) | Continuous-time neural dynamics |
+| Neural Ordinary Differential Equation (Neural ODE) | Learned continuous-time dynamics |
 | Temporal-Token Transformer | Attention-based temporal prediction |
 
-Each model predicts future cell states using principal-component representations of gene expression and the requested forecasting interval.
+Models use PCA-based representations of gene expression and a time-interval input to predict future transcriptional states.
 
-## Datasets
+## Datasets and Forecasting Tasks
 
 ### 1. Human Fibroblast Senescence
 
-The primary dataset contains time-course scRNA-seq measurements from human fibroblasts undergoing oxidative-stress-associated senescence following hydrogen peroxide treatment.
+The primary dataset consists of time-course scRNA-seq measurements from human fibroblasts undergoing oxidative-stress-associated senescence following hydrogen peroxide treatment.
 
-- **Prediction target:** Day 7
-- **Evaluation:** Completely held-out Day-7 cell population
-- **Model selection:** Earlier validation time points
-- **Biological process:** Cellular senescence
+- **Forecasting task:** Predict the Day-7 population from Day-0 cells.
+- **Held-out endpoint:** Day 7.
+- **Validation endpoint:** Day 4.
+- **Biological process:** Cellular senescence.
 
-### 2. Epithelial-to-Mesenchymal Transition (EMT)
+### 2. Epithelial-to-Mesenchymal Transition
 
-The secondary dataset contains time-course scRNA-seq measurements from human MCF10A breast epithelial cells treated with TGF-β to induce EMT.
+The secondary dataset contains time-course scRNA-seq measurements from TGF-β-treated human MCF10A breast epithelial cells undergoing EMT.
 
-- **Prediction target:** Day 8
-- **Evaluation:** Completely held-out Day-8 cell population
-- **Biological process:** Epithelial-to-mesenchymal transition
-- **Purpose:** Evaluate the forecasting framework in a second biological system
+- **Forecasting task:** Predict the Day-8 population from Day-0 cells.
+- **Held-out endpoint:** Day 8.
+- **Validation endpoint:** Day 6.
+- **Biological process:** Epithelial-to-mesenchymal transition.
 
-Model architectures and training hyperparameters were transferred from the primary experiment, while PCA dimensions and optimal-transport settings were selected independently for the EMT dataset.
+The same six model architectures and overall experimental framework were applied to both datasets. PCA dimensionality and optimal-transport pairing settings were selected independently using each dataset's earlier validation time points.
 
 ## Methodology
 
 ### 1. Data Preprocessing
 
-Gene-expression measurements were processed using a consistent preprocessing framework:
+Gene-expression measurements were processed using the following framework:
 
-1. Normalize and log-transform expression values.
-2. Select 2,000 highly variable genes.
+1. Normalize and log-transform expression measurements.
+2. Select 2,000 highly variable genes (HVGs).
 3. Standardize expression using training-derived statistics.
 4. Apply principal component analysis (PCA).
-5. Represent cells in a reduced-dimensional transcriptional space.
+5. Represent cells in reduced-dimensional transcriptional space.
 
-Preprocessing and model selection were performed without using the final held-out forecasting endpoint.
+Preprocessing parameters were fitted without access to the final held-out endpoint population.
 
-### 2. Cell Correspondence Construction
+### 2. PCA Dimensionality Selection
 
-Because time-course scRNA-seq consists of separate population measurements, direct cell-to-cell correspondences between time points are generally unavailable.
+PCA dimensionality was evaluated using earlier validation endpoints rather than the final forecasting targets.
 
-Two pairing strategies were compared:
+Each model was evaluated across multiple PCA dimensionalities, and the dimensionality producing the strongest validation performance was selected.
 
-- **Optimal-transport pairing:** Entropic Sinkhorn optimal transport was used to infer correspondences between observed cell populations, followed by assignment under a target-use cap.
-- **Capped-random pairing:** Source cells were paired with randomly selected observed target cells under a comparable target-use constraint.
+This allowed different architectures to operate at dimensionalities suited to their predictive behavior rather than imposing a single fixed representation across every model.
 
-These strategies allowed the study to examine whether inferred cell correspondences improve downstream forecasting performance.
+### 3. Cell Correspondence Construction
 
-### 3. Model Training and Forecasting
+Because scRNA-seq measures different cells at different time points, direct cell-to-cell correspondences are generally unavailable.
 
-Models were trained using earlier observed time points and corresponding time intervals.
+Two training-pair construction strategies were compared:
 
-The final forecasting task required models to predict an unseen future population beyond the training period.
+**Optimal-transport pairing**
 
-Model-specific PCA dimensions were selected using validation data, and predicted PCA representations were transformed back into gene-expression space for evaluation.
+Entropic Sinkhorn optimal transport was used to estimate correspondences between observed cell populations in PCA space. The resulting transport relationships were converted into source-target training pairs using a target-use cap.
 
-### 4. Evaluation
+**Capped-random pairing**
 
-Forecasting performance was evaluated using multiple complementary metrics:
+Source cells were paired with randomly selected observed target cells under a comparable target-use constraint.
 
-- **Pearson r²:** Agreement between predicted and observed population-level mean gene expression.
-- **Endpoint R²:** Additional measure of population-level expression accuracy.
-- **Wasserstein distance:** Distributional difference between predicted and observed populations.
-- **Mean gene-expression variance:** Variation across predicted cells.
-- **Mean distance from population center:** Overall population dispersion.
-- **PCA-space variance preservation:** Comparison of predicted and observed variance within the modeled PCA subspace.
+Comparing these approaches allowed the study to investigate whether transport-informed cell correspondences improved forecasting performance relative to random pairings.
 
-Evaluations were performed across all 2,000 selected highly variable genes and a subset of the 100 most variable genes.
+### 4. Model Training and Future-State Prediction
+
+Models were trained using earlier observed time points and corresponding forecasting intervals.
+
+For final evaluation, each model received held-out Day-0 cells and predicted their transcriptional representations at the terminal endpoint.
+
+Predicted PCA representations were inverse-transformed into gene-expression space for evaluation against the observed terminal population.
+
+The Day-7 fibroblast and Day-8 EMT populations were excluded from model training, preprocessing fitting, pairing construction, and model selection.
+
+### 5. Model Evaluation
+
+Forecasting performance was assessed using complementary population-level and distributional metrics:
+
+| Metric | Purpose |
+|---|---|
+| Pearson r² | Measures agreement between predicted and observed mean gene-expression profiles |
+| Endpoint R² | Evaluates additional population-level expression accuracy |
+| 2-Wasserstein distance (W₂) | Measures distributional discrepancy between predicted and observed cell populations |
+| Mean gene-expression variance | Measures predicted cell-to-cell variability |
+| Mean distance from population center | Evaluates population dispersion |
+| PCA-space variance preservation | Compares predicted and observed variability in PCA space |
+
+Gene-expression accuracy was evaluated using all 2,000 selected HVGs and the top 100 most variable genes.
+
+Distributional metrics were included because accurately predicting average gene expression does not necessarily mean reproducing the diversity of individual cell states.
 
 ## Results
 
-### Primary Dataset: Fibroblast Senescence
+### Fibroblast Senescence
 
 All six models outperformed the Day-0 persistence baseline when forecasting the held-out Day-7 population.
 
-Under optimal-transport pairing, **Random Forest achieved the highest population-level Pearson r²**, with:
+Under optimal-transport pairing, **Random Forest achieved the highest population-level Pearson r²**:
 
-- **All 2,000 HVGs:** 0.9314
-- **Top 100 HVGs:** 0.8181
+| Evaluation | Pearson r² |
+|---|---:|
+| All 2,000 HVGs | 0.9314 |
+| Top 100 HVGs | 0.8181 |
 
-The results also showed that high endpoint accuracy did not necessarily correspond to preservation of observed cell-to-cell variation.
+The results demonstrated that strong mean-expression accuracy did not necessarily correspond to accurate preservation of observed cell-to-cell variability.
 
-### Secondary Dataset: EMT
+### Epithelial-to-Mesenchymal Transition
 
 All six architectures also outperformed the persistence baseline when forecasting the held-out Day-8 population.
 
-Under optimal-transport pairing, **XGBoost achieved the highest All-HVG Pearson r²**, while the Temporal-Token Transformer achieved the highest Top-100-HVG Pearson r².
+Under optimal-transport pairing, XGBoost achieved the strongest All-HVG Pearson r², while the Temporal-Token Transformer achieved the strongest Top-100-HVG Pearson r².
 
-| Metric | Best model | Score |
-|---|---|---|
-| All-HVG Pearson r² | XGBoost | 0.9737 |
-| Top-100-HVG Pearson r² | Temporal-Token Transformer | 0.9436 |
+| Evaluation | Best model | Pearson r² |
+|---|---|---:|
+| All 2,000 HVGs | XGBoost | 0.9737 |
+| Top 100 HVGs | Temporal-Token Transformer | 0.9436 |
 
 ### Main Findings
 
-- Future population-level transcriptional states could be forecast with substantially greater accuracy than the persistence baseline in both datasets.
-- No single model architecture consistently dominated across both biological systems.
+- Models successfully forecast population-level transcriptional states beyond the observed training period in both biological systems.
+- No single architecture consistently dominated across all datasets and evaluation metrics.
 - More complex neural architectures did not consistently outperform simpler regression and tree-based methods.
-- Optimal-transport pairing did not universally improve forecasting performance.
-- High endpoint-expression accuracy did not necessarily indicate accurate preservation of observed population variability.
+- Optimal-transport pairing did not universally improve forecasting accuracy relative to capped-random pairing.
+- Strong mean-expression predictions did not guarantee preservation of the observed population's cellular variability.
+
+These findings highlight the importance of evaluating both expression-level accuracy and distributional similarity when forecasting future scRNA-seq populations.
 
 ## Reproducibility
 
-The experimental framework uses controlled random seeds, shared training and evaluation procedures, and held-out future endpoints.
+The experiments use controlled random seeds, standardized training and evaluation procedures, and independent validation and testing endpoints.
 
-To preserve the validity of forecasting evaluation, the final endpoint populations were excluded from preprocessing fitting, model training, correspondence construction, and hyperparameter selection.
+The final endpoint populations were excluded from preprocessing fitting, model training, correspondence construction, and model selection to reduce the risk of data leakage.
 
-The repository contains the code used for the forecasting experiments and associated analyses.
+The two Jupyter notebooks provide the primary implementations for the fibroblast and EMT forecasting experiments.
+
+Raw datasets and intermediate experimental outputs are not included in this repository.
 
 ## Limitations and Future Work
 
-The study evaluated two biological systems and a finite set of model architectures and hyperparameter configurations.
+The study was conducted using two biological systems and a limited collection of computational architectures and hyperparameter configurations.
 
-Although the results demonstrate strong population-level forecasting performance, they do not establish that predicted cells reproduce biologically correct individual-cell trajectories or subpopulations.
+Although the models demonstrated strong population-level forecasting performance, the results do not establish that individual predicted cells follow biologically correct trajectories.
 
-Future research could investigate additional biological datasets, longer forecasting horizons, more extensive model optimization, and distribution-aware forecasting approaches.
+Future work could investigate additional biological datasets, longer forecasting horizons, improved distribution-aware training objectives, and more extensive model optimization.
+
+## Research Contributions and AI Usage
+
+I directed the computational research workflow, selected and evaluated methodologies, designed experiments, compared model performance, interpreted results, and developed the scientific conclusions with guidance from my research mentor.
+
+AI-assisted tools were used extensively to generate, debug, and refine the Python implementations and visualizations. I guided the implementation requirements, evaluated the outputs, and reviewed the resulting analyses.
+
+The research decisions, experimental evaluation, and scientific interpretations were conducted under my direction.
+
+## Research Manuscript
+
+The experimental analyses and research manuscript are complete. The manuscript is undergoing final citation review, reference formatting, and preparation for submission.
+
+A finalized manuscript may be added to this repository following the remaining review.
 
 ## Research Context
 
 This project was developed through Polygence as an independent computational biology research study.
 
-Its primary objective is to evaluate computational approaches for forecasting future transcriptional states from time-course scRNA-seq data and to identify how model architecture influences predictive performance.
+Its primary objective is to evaluate computational methods for forecasting future transcriptional states from time-course scRNA-seq data and to identify how model architecture and cell-pairing strategy influence predictive performance.
