@@ -120,22 +120,45 @@ Predicted PCA representations were inverse-transformed into gene-expression spac
 
 The Day-7 fibroblast and Day-8 EMT populations were excluded from model training, preprocessing fitting, pairing construction, and model selection.
 
+
 ### 5. Model Evaluation
 
-Forecasting performance was assessed using complementary population-level and distributional metrics:
+Forecasting performance was evaluated using two quantitative metrics and visual comparisons of predicted cell-state distributions.
 
-| Metric | Purpose |
-|---|---|
-| Pearson r² | Measures agreement between predicted and observed mean gene-expression profiles |
-| Endpoint R² | Evaluates additional population-level expression accuracy |
-| 2-Wasserstein distance (W₂) | Measures distributional discrepancy between predicted and observed cell populations |
-| Mean gene-expression variance | Measures predicted cell-to-cell variability |
-| Mean distance from population center | Evaluates population dispersion |
-| PCA-space variance preservation | Compares predicted and observed variability in PCA space |
+**Pearson r² — Population-Level Gene Expression Accuracy**
 
-Gene-expression accuracy was evaluated using all 2,000 selected HVGs and the top 100 most variable genes.
+Pearson r² measures the squared correlation between predicted and observed mean gene-expression profiles.
 
-Distributional metrics were included because accurately predicting average gene expression does not necessarily mean reproducing the diversity of individual cell states.
+Performance was evaluated across:
+- All 2,000 highly variable genes (HVGs).
+- The top 100 most variable genes, selected using training-derived gene variance.
+
+Higher Pearson r² values indicate stronger agreement between predicted and observed mean-expression profiles.
+
+**2-Wasserstein Distance (W₂) — Distributional Similarity**
+
+The 2-Wasserstein distance measures differences between predicted and observed cell-state distributions in PCA space.
+
+Unlike Pearson r², which evaluates mean gene expression, W₂ measures differences in the distributions of predicted and observed cell states.
+
+Lower W₂ values indicate greater distributional similarity.
+
+**PCA Distribution Visualizations — Six-Model Comparison**
+
+Predicted and observed terminal cell populations were visualized using two-dimensional PCA projections.
+
+Six panels (A–F) compare the observed population against predictions from each forecasting architecture:
+- Ridge Regression
+- Multi-Layer Perceptron (MLP)
+- XGBoost
+- Random Forest
+- Neural ODE
+- Temporal-Token Transformer
+
+These visualizations illustrate differences in population structure, dispersion, and predicted cell-state distributions across models.
+
+Together, Pearson r², Wasserstein-2 distance, and PCA distribution visualizations provide complementary perspectives on forecasting accuracy and distributional similarity.
+
 
 ## Results
 
