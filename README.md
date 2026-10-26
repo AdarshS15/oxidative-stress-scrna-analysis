@@ -1,4 +1,3 @@
-
 # Forecasting Future Transcriptional States Using Time-Course scRNA-seq
 
 ## Project Overview
