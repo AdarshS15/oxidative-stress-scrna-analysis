@@ -1,5 +1,11 @@
 # Forecasting Future Transcriptional States Using Time-Course scRNA-seq
 
+## Research Manuscript
+
+This project is documented in a completed first-author research manuscript detailing the computational methodology, predictive models, experimental evaluation, and findings.
+
+**[Read the Full Research Manuscript](Adarsh%20Shankarling%20ScRNA-Seq%20Full%20Manuscript.pdf)**
+
 ## Project Overview
 
 This research investigates whether machine learning models can forecast future transcriptional states using earlier time-course single-cell RNA sequencing (scRNA-seq) measurements.
