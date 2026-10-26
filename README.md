@@ -217,9 +217,9 @@ Future work could investigate additional biological datasets, longer forecasting
 
 I directed the computational research workflow, selected and evaluated methodologies, designed experiments, compared model performance, interpreted results, and developed the scientific conclusions with guidance from my research mentor.
 
-AI-assisted tools were used extensively to generate, debug, and refine the Python implementations and visualizations. I guided the implementation requirements, evaluated the outputs, and reviewed the resulting analyses.
+Generative AI tools were used to produce the Python code, computational pipelines, and visualizations throughout this project. I guided the coding process by defining implementation requirements, specifying model architectures and experimental procedures, providing feedback, identifying issues, and directing revisions. I also reviewed the resulting outputs and evaluated their consistency with the intended methodology.
 
-The research decisions, experimental evaluation, and scientific interpretations were conducted under my direction.
+Although the code was generated using AI, the research direction, experimental design, methodological decisions, evaluation of results, and scientific interpretations were conducted under my direction.
 
 ## Research Manuscript
 
